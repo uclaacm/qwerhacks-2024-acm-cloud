@@ -1,10 +1,36 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+import { useEffect } from 'react'
+import db from "./firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState()
+
+  useEffect(() => {
+    getCount();
+  }, []);
+
+	async function getCount() {
+		const docRef = doc(db, 'shared_content', 'home_page');
+		const snapshot = await getDoc(docRef);
+		if (snapshot.empty) {
+		  console.log('No matching documents.');
+		  return null;
+		}  
+
+    const data = snapshot.data();
+    setCount(data.clicks);   
+	}
+
+  function incrementCount() {
+    const cnt = {'clicks': count + 1}
+    const docRef = doc(db, 'shared_content', 'home_page');
+    setDoc(docRef, cnt);
+    setCount(count + 1);
+  }
 
   return (
     <>
@@ -18,7 +44,7 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
+        <button onClick={incrementCount}>
           count is {count}
         </button>
         <p>
